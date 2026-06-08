@@ -1,10 +1,10 @@
 STAGE 0 CAPSTONE - DELIVERABLE 1 (ANONYMIZED)
 SUSPICIOUS-LOGIN EVIDENCE TABLE
 
-Author: [STUDENT-NAME]
-Intern Code: [INTERN-CODE]
+Author: Gift Anekwe
+Intern Code: UBI-2026-0092
 Date Completed: 04 June 2026
-Programme: [INTERNSHIP-PROGRAMME] • Cybersecurity Internship • Cohort 1 Stage: 0 • Induction at the gate
+Programme: Ubuntu Bridge Initiative • Cybersecurity Internship • Cohort 1 Stage: 0 • Induction at the gate
 
 ═══════════════════════════════════════════════════════════════════════
 
@@ -110,7 +110,3 @@ NEXT INVESTIGATIVE STEPS
 4. Verify who was physically using [OPERATIONS-ANALYST]'s office laptop during June 4-5. Contact [FINANCE-MANAGER] to confirm whether [FINANCE-MANAGER] was covering [OPERATIONS-ANALYST]'s duties, or investigate whether an unauthorized person accessed the desk.
 
 5. Review the ticket history to understand why critical-severity alerts ([TICKET-C], [TICKET-D]) were dismissed without investigation. Implement a procedural change: alerts marked CRITICAL or HIGH severity require escalation to a second analyst or manager within 1 hour. No single analyst should close a CRITICAL ticket without peer review.
-
-═══════════════════════════════════════════════════════════════════════
-END OF D1 (ANONYMIZED)
-═══════════════════════════════════════════════════════════════════════
