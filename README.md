@@ -117,6 +117,6 @@ MIT License — See LICENSE file for details.
 
 ---
 
-**Author**: [Your Name]  
+**Author**: Gift Anekwe  
 **Date**: June 2026  
 **Programme**: Ubuntu Bridge Initiative Cybersecurity Internship, Cohort 1, Stage 0
