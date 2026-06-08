@@ -1,0 +1,152 @@
+STAGE 0 CAPSTONE - DELIVERABLE 3 (ANONYMIZED)
+BUSINESS IMPACT & EXECUTIVE ACTION PLAN
+
+Author: [STUDENT-NAME]
+Intern Code: [INTERN-CODE]
+Date Completed: 04 June 2026
+Programme: [INTERNSHIP-PROGRAMME] • Cybersecurity Internship • Cohort 1 Stage 0 • Induction at the gate
+
+═══════════════════════════════════════════════════════════════════════
+
+EXECUTIVE FINDING
+
+[FINTECH-CLIENT] was compromised in Q2 2024 by a known threat actor named The Griot. Between June 3-5, The Griot conducted a targeted attack that resulted in the theft of customer financial data (names, addresses, transaction amounts). The attack succeeded not because of a technical weakness but because [FINTECH-CLIENT]'s security team dismissed every alert that detected it.
+
+What happened:
+On June 4 at 02:07 UTC, The Griot broke into the account of [OPERATIONS-ANALYST] using valid credentials. Within 54 minutes, The Griot created a compressed file containing [FINTECH-CLIENT]'s customer and transaction databases and exfiltrated it to an external server. The SIEM flagged this activity as CRITICAL severity but the security analyst dismissed it as "probably nothing."
+
+Who is affected:
+Every customer whose data appears in customers.csv and transactions.csv is now at risk. [FINTECH-CLIENT]'s customer trust is compromised, and regulatory bodies (Data Protection Officer, financial authorities) will require notification.
+
+What we don't know:
+- How The Griot obtained [OPERATIONS-ANALYST]'s credentials (phishing, credential stuffing, insider threat, password spray)
+- Whether The Griot accessed additional data beyond customers.csv and transactions.csv
+- Whether The Griot installed persistence mechanisms (backdoors, scheduled tasks) that remain active
+- Whether additional user accounts were compromised beyond [OPERATIONS-ANALYST] and [FORMER-EMPLOYEE-ACCOUNT]
+- Whether The Griot is still in the system
+
+═══════════════════════════════════════════════════════════════════════
+
+WHAT IS AT RISK
+
+1. Data at Risk:
+The stolen databases contain customer names, addresses and transaction records. This is regulated data under the Nigerian Data Protection Regulation (NDPR). Each customer record is personally identifiable information (PII) and [FINTECH-CLIENT] is legally obligated to notify affected individuals of the breach, document it with the [DPO], and conduct impact assessments.
+
+2. Threat Actor Profile:
+The Griot is a known regional threat actor documented in threat-intel feeds. This is not a random attacker or opportunistic breach. It is a targeted, sophisticated campaign that used valid credentials (either obtained through credential theft or purchase from underground markets) and the attacker demonstrated knowledge of [FINTECH-CLIENT]'s systems (knew which databases to target, understood file paths and compression techniques) and operated with quite a deliberate intent.
+
+3. System Persistence Risk:
+On June 4 at 02:14 UTC, a cron RELOAD event occurred outside normal maintenance windows. This indicates that The Griot could have installed persistence mechanisms (backdoors, scheduled tasks, reverse shells) and if it was successful, then The Griot may still have access to [FINTECH-CLIENT]'s systems even after credential reset.
+
+4. Secondary Account Compromise:
+Account [FORMER-EMPLOYEE-ACCOUNT] (offboarded April 12) appears in authentication logs on June 3, 4, 5. Either [FINTECH-CLIENT] failed to deactivate [FORMER-EMPLOYEE-ACCOUNT]'s account (process failure) or The Griot also obtained [FORMER-EMPLOYEE-ACCOUNT]'s credentials. Either scenario indicates a second potential entry point into the system.
+
+═══════════════════════════════════════════════════════════════════════
+
+IMMEDIATE ACTIONS (NEXT 72 HOURS)
+
+✓ ACTION 1: NOTIFY LEGAL AND COMPLIANCE
+Owner: [CEO] with support from [DPO]
+Timeline: Within 12 hours of this report
+
+To Do: Immediately convene legal and compliance teams. Brief them on:
+- Confirmed breach of customer data (customers.csv, transactions.csv)
+- Number of affected customers (TBD after inventory)
+- Date of theft (06 June 04, 2024, 03:01 UTC)
+- Threat actor attribution (The Griot, known regional threat actor)
+- Regulatory obligations under NDPR (notify DPO within 24 hours, notify affected individuals, conduct Data Processing Impact Assessment)
+
+Deliverable: Written incident summary for legal review. Initiate breach notification process.
+Risk if not completed: [FINTECH-CLIENT] violates NDPR notification requirements, regulatory penalties, loss of customer trust and reputational damage.
+
+✓ ACTION 2: DISABLE COMPROMISED CREDENTIALS
+Owner: [HEAD-OF-SECURITY] with support from [HEAD-OF-ENGINEERING]
+Timeline: Within 16 hours of this report
+
+Action:
+- Force an immediate password reset for [OPERATIONS-ANALYST] and revoke all active SSH sessions authenticated as [OPERATIONS-ANALYST].
+- Disable [FORMER-EMPLOYEE-ACCOUNT]'s account entirely ([FORMER-EMPLOYEE-ACCOUNT] is offboarded; this should have been done in April).
+- Issue a network-wide alert blocking IP 185.220.101.9 at all network edges (firewall, proxy, VPN).
+- Scan system logs to identify whether [OPERATIONS-ANALYST] or [FORMER-EMPLOYEE-ACCOUNT] were used to access any other systems or data between June 3-5.
+- Search for any SSH keys, cron jobs, or scheduled tasks created between 02:00 UTC and 03:30 UTC on June 4 that may indicate persistence.
+
+Deliverable: Incident response checklist confirming each credential disabled, network blocks confirmed and scan results reviewed.
+Risk if not completed: Attacker maintains access resulting to possible exfiltration of additional data and system compromise.
+
+✓ ACTION 3: INVENTORY AND NOTIFY CUSTOMERS
+Owner: [HEAD-OF-COMMS] with support from [HEAD-OF-SECURITY] and [DPO]
+Timeline: Within 72 hours of this report
+
+Action:
+- Determine the exact number of customer records in customers.csv and transactions.csv (initial assessment: likely 500-2000 based on [FINTECH-CLIENT]'s customer base).
+- Prepare a customer notification letter explaining: (1) that a breach occurred, (2) what data was affected, (3) what [FINTECH-CLIENT] is doing to prevent future incidents, (4) what customers should do (monitor accounts, watch for fraud).
+- Coordinate with [HEAD-OF-COMMS] to draft external statement for media/public (The Griot's involvement, The Griot is a known threat actor, no ongoing access).
+- Send individual notifications to all affected customers within 72 hours via secure channels (registered email, SMS).
+
+Deliverable: Customer notification list, notification letter, media statement.
+Risk if not completed: Affected customers learn about the breach from other sources (news, credential-checking websites) and so trust is irreversibly damaged. Regulatory penalties also apply for failure to notify.
+
+═══════════════════════════════════════════════════════════════════════
+
+CONTINUED INVESTIGATION (WEEK 2)
+
+INVESTIGATION ACTIONS:
+
+1. Engage a third-party digital forensics firm to conduct a full post-breach forensic analysis of [GATEWAY-SERVER] and any other systems that may have been accessed. They'd determine: persistence mechanisms, lateral movement, data access timeline and credential usage patterns.
+
+2. Contact [OPERATIONS-ANALYST] and [FINANCE-MANAGER] to understand: How were [OPERATIONS-ANALYST]'s credentials obtained? Is [OPERATIONS-ANALYST] aware of any phishing attempts, credential-sharing incidents, or suspicious activity on [OPERATIONS-ANALYST]'s accounts? Was [FINANCE-MANAGER] using [OPERATIONS-ANALYST]'s credentials to cover duties during leave?
+
+3. Implement mandatory 72-hour breach detection SLA: Any CRITICAL severity alert must be escalated to [HEAD-OF-SECURITY] within 1 hour. No single analyst may dismiss a CRITICAL ticket without manager approval and documented reasoning.
+
+4. Review all other Q2 2024 tickets to identify whether any other dismissals followed the same pattern (bundling, "resolved-by-reference" without investigation).
+
+5. Reach out to The Griot's known associates in threat-intel networks. [FINTECH-CLIENT] may wish to engage a threat intelligence firm to track whether the stolen customer data is being sold, traded or used for follow-on attacks.
+
+═══════════════════════════════════════════════════════════════════════
+
+SYSTEMIC RECOMMENDATION & EVIDENCE APPENDIX
+
+SYSTEMIC RECOMMENDATION
+
+This breach was simply caused by organizational failure: a security alert system that worked correctly and a human being who kept on dismissing alerts.
+
+[FINTECH-CLIENT] must implement a mandatory escalation rule: CRITICAL and HIGH severity alerts require peer review and manager approval before closure. This is a non-negotiable policy change.
+
+Additionally, [FINTECH-CLIENT] must re-train all SOC analysts on threat recognition and escalation protocols. The analyst who dismissed [TICKET-A], [TICKET-C], and [TICKET-D] may not have understood that these alerts were related, or may not have recognized the severity of data exfiltration.
+
+EVIDENCE APPENDIX
+
+This report is based on the following evidence:
+
+● anonymized-auth-log.txt ([FINTECH-CLIENT] [GATEWAY-SERVER] authentication log, June 3-5, 2024)
+  - Lines 12-16: Jun 4 02:07:52 login from 185.220.101.9
+  - Lines 18, 21, 29: Daytime logins from office IP 102.89.34.17
+  - Lines 22-24: Jun 5 03:14:22 repeat login from 185.220.101.9
+  - Lines 9, 20, 30: [FORMER-EMPLOYEE-ACCOUNT] authentication
+
+● anonymized-staff-roster.csv ([FINTECH-CLIENT] staff directory, current as of June 2024)
+  - [OPERATIONS-ANALYST]: Finance Analyst, on leave 6/3/2024-6/7/2024, manager [FINANCE-MANAGER]
+  - [FORMER-EMPLOYEE-ACCOUNT]: Junior Analyst, offboarded 4/12/2024, should have no access
+  - [HEAD-OF-SECURITY]: Head of Security, reopened ticket [TICKET-A] on 7/11/2024
+
+● anonymized-ticket-history.csv (SOC ticket history, Q2 2024)
+  - [TICKET-1]: Brute force (dismissed)
+  - [TICKET-2]: Brute force (dismissed)
+  - [TICKET-3]: SSH key issue (dismissed)
+  - [TICKET-A]: Foreign IP login (dismissed as "probably nothing")
+  - [TICKET-5]: cron RELOAD (dismissed as IT activity)
+  - [TICKET-C]: Tarball creation (dismissed as "personal backup test")
+  - [TICKET-D]: Data exfiltration (CRITICAL severity, dismissed by reference)
+  - [TICKET-B]: Repeat foreign IP login (dismissed by reference)
+  - [TICKET-F]: sudo activity (dismissed as approved)
+  - [TICKET-G]: [FORMER-EMPLOYEE-ACCOUNT] appearing in logs (handed to IT)
+  - [TICKET-H]: [THREAT-INTEL-LEAD]'s manual escalation and correlation (quarantine issued)
+
+● anonymized-encoded-strings.txt
+  - String #4 decoded: "The Griot is already inside the walls" (threat actor attribution)
+
+● External Reference: MITRE ATT&CK T1078 — Valid Accounts: use of valid credentials to gain access
+
+═══════════════════════════════════════════════════════════════════════
+END OF D3 (ANONYMIZED)
+═══════════════════════════════════════════════════════════════════════

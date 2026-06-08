@@ -1,0 +1,47 @@
+STAGE 0 CAPSTONE - DELIVERABLE 4 (ANONYMIZED)
+JUDGEMENT ESSAY
+
+Author: [STUDENT-NAME]
+Intern Code: [INTERN-CODE]
+Date Completed: 04 June 2026
+Programme: [INTERNSHIP-PROGRAMME] • Cybersecurity Internship • Cohort 1 Stage: 0 • Induction at the gate
+
+═══════════════════════════════════════════════════════════════════════
+
+PART A – THE ETHICS CALL
+
+I would respectfully disagree with my manager's instruction to close the matter and would focus on preserving the evidence and ensuring the incident is reviewed by the appropriate personnel. Based on my investigation in D1, the evidence points to a pattern of suspicious activity involving the account of [OPERATIONS-ANALYST], including repeated access from IP 185.220.101.9 while the employee was on leave, traits of privilege escalation activity, indications of data exfiltration and active authentication session by a 1month+ offboarded employee account. Additionally, the appearance of the threat actor name "The Griot" in the evidence pack further increases the seriousness of the incident which I cannot just 'close'.
+
+During the next 24 hours, my first step would be to document all evidence and findings in the ticketing system. I would ensure that the related tickets ([TICKET-A], [TICKET-C], [TICKET-D], [TICKET-B] and associated alerts) are properly linked together and that the supporting evidence is preserved. I would then send a written summary to my manager outlining the facts observed and the potential risk to [FINTECH-CLIENT] and its customers.
+
+I would not close the ticket without proper investigation and I also would not modify, delete or hide any evidence. Closing the incident despite its intricacy and seriousness would only compound the problem and serve to create more risk of active compromise. The ISC2 Code of Ethics canon most relevant here is "Protect society, the common good, necessary public trust and confidence, and the infrastructure."
+
+Considering the above, my responsibility in this clear case of customer information breach extends necessarily beyond the convenience of my manager and/or the organisation. If my manager insists on closure, I would sharply escalate the matter through the appropriate chain of command, which goes to [HEAD-OF-SECURITY], followed by another to [THREAT-INTEL-LEAD] if it requires I do so.
+
+My message would go this way…
+
+"During review of multiple security alerts, I identified a recurring pattern involving account [OPERATIONS-ANALYST], source IP 185.220.101.9, and related tickets [TICKET-A], [TICKET-C], [TICKET-D] and [TICKET-B]. The evidence indicates possible unauthorized access and potential data exfiltration. I am requesting review and guidance before closure due to the potential impact on customer data and organizational security."
+
+While escalating this might create great professional discomfort as it seems I am going against my manager, I believe however, that the greater risk would be failing to act on this evidence that suggests a significant security incident of this grade.
+
+═══════════════════════════════════════════════════════════════════════
+
+PART B – THE SCENARIO
+
+Having worked through the [FINTECH-CLIENT] case, I might be traumatized to assume that the alert is a compromise at first glance but putting myself in check, I'd first validate the alert by reviewing the authentication details including source IP address, authentication method, device information and any other associated activity occurring after the login. I would additionally review the user's historical login patterns to determine whether the activity is consistent with previous behavior.
+
+My next step would then be to review ticket [TICKET-10] because the alert specifically references an employee ([OPERATIONS-ANALYST], now the Operations Manager) whose offboarding process is still incomplete. In my D1 and D2 work, one of the lessons I learned was that account lifecycle management can create security gaps which is true because I observed that [FORMER-EMPLOYEE-ACCOUNT]'s account continued to authenticate after offboarding, demonstrating that delaying account revocation can easily become a security risk. For that reason, I'd treat the incomplete offboarding status as a significant factor in my assessment.
+
+After confirming that the login occurred at 04:47 WAT outside normal business activity and also noting that the employee was not on the on-call roster, I would escalate the matter to my shift lead or [TIER-2-ANALYST]. This escalation trigger would contain and/or be the combination of unusual login timing, an account pending revocation and the possibility that credentials are being used by someone other than the employee.
+
+I would not immediately disable the account unless authorized by procedure or directed by a senior responder. This is because if I prematurely lock the account, it could interfere with an ongoing investigation or disrupt legitimate business activity if the login is later determined to be authorized. I would also avoid contacting the employee directly before coordinating with management and HR because there may be employment-related considerations associated with the offboarding process.
+
+Rather than appending all activity to [TICKET-10], I would open a new security incident and cross-reference the offboarding ticket. One lesson from my D2 analysis was that repeatedly bundling alerts into existing tickets causes investigators to overlook new evidence. Creating a linked incident ensures the authentication event receives independent review while maintaining context.
+
+My handover note would contain my summarization of timeline, evidence reviewed, escalation actions taken and any other outstanding investigative tasks. I would include the source IP, authentication details, account status, ticket references and my current assessment of its risk. I would also recommend continued monitoring of the account and verification of the revocation process during the next shift.
+
+Given [FINTECH-CLIENT]'s recent history of missed authentication-related alerts and delayed escalation, I would prioritize careful documentation and timely escalation to ensure that a potentially serious incident is not dismissed prematurely.
+
+═══════════════════════════════════════════════════════════════════════
+END OF D4 (ANONYMIZED)
+═══════════════════════════════════════════════════════════════════════

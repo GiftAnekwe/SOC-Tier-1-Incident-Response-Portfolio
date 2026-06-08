@@ -1,0 +1,111 @@
+STAGE 0 CAPSTONE - DELIVERABLE 2 (ANONYMIZED)
+TIER-1 DISMISSAL PATTERN ANALYSIS
+
+Author: [STUDENT-NAME]
+Intern Code: [INTERN-CODE]
+Date Completed: 04 June 2026
+Programme: [INTERNSHIP-PROGRAMME] • Cybersecurity Internship • Cohort 1 Stage: 0 • Induction at the gate
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 1: THE DISMISSAL PATTERN
+
+Between June 3-8, 2024, [FINTECH-CLIENT]'s SOC Tier 1 analyst ([TIER-1-ANALYST]) systematically dismissed nine critical and high-severity security alerts related to the same attack. Rather than investigating suspicious activity, the analyst closed each ticket with minimal examination, bundled subsequent alerts into earlier dismissals and provided vague explanations ("probably nothing," "personal backup test," "resolved-by-reference") without escalation or peer review.
+
+Much more a decision-making failure than a technical one because it is appalling that a human being saw alerts marked CRITICAL severity, alerts indicating data exfiltration and yet decided that they were nothing to worry about.
+
+The pattern spans these tickets:
+
+• [TICKET-1] (Jun 1, 11:14 UTC): Brute force against root account from 45.95.147.12. Dismissed as "edge fail2ban handled it."
+
+• [TICKET-2] (Jun 2, 03:22 UTC): Brute force burst against admin account, same source. Dismissed as "same source as [TICKET-1], closed by reference."
+
+• [TICKET-3] (Jun 3, 21:48 UTC): User reports SSH key refused then worked. Dismissed as "no follow-up, key cache."
+
+• [TICKET-A] (Jun 4, 07:55 UTC): Accepted publickey for [OPERATIONS-ANALYST] from foreign IP 185.220.101.9. Dismissed as "probably nothing, user on leave; possibly VPN." This was the first critical alert in the attack sequence.
+
+• [TICKET-5] (Jun 4, 02:14 UTC): cron RELOAD outside change window. Dismissed as "IT confirmed no work" without documented investigation.
+
+• [TICKET-C] (Jun 4, 02:31 UTC): Large tarball created from customers.csv + transactions.csv. Marked HIGH severity. Dismissed as "[OPERATIONS-ANALYST] explained as personal backup test."
+
+• [TICKET-D] (Jun 4, 03:01 UTC): scp outbound to 185.220.101.9:/dropbox/. Marked CRITICAL severity. This is confirmed data exfiltration, yet dismissed as "resolved-by-reference" to [TICKET-C].
+
+• [TICKET-B] (Jun 5, 03:14 UTC): Repeat of [TICKET-A] (same source 185.220.101.9). Dismissed as "resolved-by-reference" to the original [TICKET-A] dismissal.
+
+• [TICKET-F] (Jun 5, 03:16 UTC): sudo less /var/log/* used by [OPERATIONS-ANALYST]. Dismissed as "approved for triage" despite the temporary approval being 14+ days expired.
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 2: PER-TICKET WALKTHROUGH
+
+TICKET [TICKET-A] (June 4, 07:55 UTC): "Accepted publickey for [OPERATIONS-ANALYST] from non-corporate IP 185.220.101.9"
+
+- What SIEM raised: At 02:07:52 UTC, [OPERATIONS-ANALYST]'s account successfully authenticated from an unknown foreign IP. This is automatically flagged as medium severity because it violates multiple security policies: non-corporate IP, off-hours access, unexpected geographic location.
+
+- How dismissed: At 07:55 UTC (5.5 hours after the actual login), the analyst reviewed the alert and closed it at 08:14 UTC with disposition "probably nothing" and note "user on leave; possibly VPN."
+
+- What was missed: The analyst did not verify whether [OPERATIONS-ANALYST] was actually using a VPN. The analyst did not check the auth log to see what happened AFTER the login (sudo commands, file access). The analyst did not cross-reference the ticket with the staff roster to confirm [OPERATIONS-ANALYST] was actually on leave. The analyst did not investigate why a user on leave would need to authenticate at 2:07am from overseas.
+
+- Cost: By dismissing this alert, the analyst allowed an attacker with confirmed access to the network to continue operating undetected for 48+ hours. Two subsequent break-ins ([TICKET-B]) and a data exfiltration event ([TICKET-C], [TICKET-D]) occurred after this dismissal.
+
+TICKET [TICKET-C] (June 4, 02:31 UTC): "Large tarball created in /tmp from customers.csv + transactions.csv"
+
+- What SIEM raised: A compressed file was created containing [FINTECH-CLIENT]'s customer database and transaction database. This is flagged as HIGH severity because it indicates data staging for theft. The SIEM alert was created at 02:31:55 UTC.
+
+- How dismissed: The analyst closed the ticket at 07:22 UTC with disposition "resolved-no-action" and note "[OPERATIONS-ANALYST] explained as personal backup test."
+
+- What was missed: [OPERATIONS-ANALYST] is on leave (June 3-7 per roster). She is not at the office and is not working. She cannot have "explained" anything to the analyst. The analyst accepted an explanation from an attacker logged in as [OPERATIONS-ANALYST]. The analyst did not ask: "Why would a finance analyst on annual leave create a compressed file containing sensitive customer data at 2:31am?" The analyst did not check what happened next in the logs (the data exfiltration at 03:01 UTC).
+
+- Cost: By dismissing this alert, the analyst missed the moment when the attacker was actively staging data for theft. The attacker proceeded to exfiltrate the data 30 minutes later.
+
+TICKET [TICKET-D] (June 4, 03:01 UTC): "scp outbound to 185.220.101.9:/dropbox/"
+
+- What SIEM raised: A secure copy (scp) command executed, transferring a file from [FINTECH-CLIENT]'s network to an external IP (185.220.101.9) at a remote path (/dropbox/). This is flagged as CRITICAL severity because it is confirmed data exfiltration.
+
+- How dismissed: The analyst closed the ticket at 07:22 UTC with disposition "resolved-by-reference" bundled into [TICKET-C].
+
+- What was missed: This is a CRITICAL severity alert. It requires immediate escalation and investigation. Instead, the analyst bundled it into [TICKET-C]'s dismissal. The analyst accepted that if the tarball creation was a "personal backup test," then the exfiltration must also be legitimate. No investigation into whether 185.220.101.9 is a known external server. No investigation into what data was in the tarball being transferred.
+
+- Cost: Customer financial data left [FINTECH-CLIENT]'s network at 03:01 UTC on June 4. It is now in an attacker's possession. This exfiltration is the moment when the breach became irreversible.
+
+TICKET [TICKET-B] (June 5, 03:14 UTC): "repeat of [TICKET-A] (same source 185.220.101.9)"
+
+- What SIEM raised: The same foreign IP (185.220.101.9) logged into [OPERATIONS-ANALYST]'s account again, 24 hours after the first break-in. This is flagged as medium severity.
+
+- How dismissed: The analyst closed the ticket at 08:02 UTC with disposition "resolved-by-reference" to [TICKET-A].
+
+- What was missed: This is not proof that the first dismissal was correct. This is new evidence of a returning attacker. Each break-in should be evaluated independently. The attacker's return 24 hours later demonstrates they have reliable access and plan to remain in the system. Instead of escalating this to a manager, the analyst treated it as confirmation that their earlier "probably nothing" assessment was correct.
+
+- Cost: The attacker maintained access to the network for additional hours because their second break-in was not treated as a new incident.
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 3: ROOT CAUSE
+
+The root cause of this dismissal pattern is single-analyst decision-making without peer review or escalation requirements.
+
+[TIER-1-ANALYST] was the sole Tier 1 analyst responsible for opening and closing tickets. [TIER-1-ANALYST] had no requirement to escalate alerts to [TIER-1-ANALYST]'s manager ([HEAD-OF-SECURITY]) or to a peer. [TIER-1-ANALYST] had no requirement to document reasoning beyond a brief note. [TIER-1-ANALYST] had no requirement to verify explanations with employees.
+
+When the SIEM created ticket [TICKET-A], [TIER-1-ANALYST] could dismiss it with a comment. When ticket [TICKET-C] (HIGH severity) appeared, [TIER-1-ANALYST] accepted an unexplained dismissal without investigation. When ticket [TICKET-D] (CRITICAL severity) appeared, [TIER-1-ANALYST] simply bundled it into an earlier dismissal and moved on.
+
+Beyond [TIER-1-ANALYST]'s irrational judgment, I believe this is also a failure of [FINTECH-CLIENT]'s process. No process required [TIER-1-ANALYST] to escalate CRITICAL tickets, get second opinions or verify employee explanations.
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 4: ESCALATION AND PROCEDURAL RECOMMENDATION
+
+On June 8 at 03:55 UTC, [THREAT-INTEL-LEAD] (Tier 2) created ticket [TICKET-H] manually after noticing a pattern across multiple alerts: "7 SIEM alerts on [AFFECTED-HOST] in 4 days — no ticket clusters them."
+
+[THREAT-INTEL-LEAD] manually correlated the dismissed tickets ([TICKET-A], [TICKET-B], [TICKET-C], [TICKET-D], and others) and realized they were part of the same attack. [THREAT-INTEL-LEAD] quarantined the affected host ([AFFECTED-HOST]) with "nft input drop" dropping all incoming traffic to prevent further attacker activity.
+
+[THREAT-INTEL-LEAD]'s manual work should not have been necessary if the SIEM auto-correlated tickets and the Tier 1 analyst spotted the pattern.
+
+Procedural Recommendation:
+
+✓ Implement a mandatory escalation rule: Any alert marked CRITICAL or HIGH severity must be escalated to a second analyst or to the manager ([HEAD-OF-SECURITY]) within 1 hour. No single analyst may close a CRITICAL ticket without peer review and documented approval from a supervisor, which should apply regardless of the analyst's seniority or experience.
+
+✓ Additionally, ticket correlation rules should be implemented in the SIEM. For example, if multiple alerts involve the same IP address, account or affected system within a 48-hour window, the SIEM should automatically bundle them into a single incident case for investigation.
+
+═══════════════════════════════════════════════════════════════════════
+END OF D2 (ANONYMIZED)
+═══════════════════════════════════════════════════════════════════════

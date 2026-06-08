@@ -1,0 +1,116 @@
+STAGE 0 CAPSTONE - DELIVERABLE 1 (ANONYMIZED)
+SUSPICIOUS-LOGIN EVIDENCE TABLE
+
+Author: [STUDENT-NAME]
+Intern Code: [INTERN-CODE]
+Date Completed: 04 June 2026
+Programme: [INTERNSHIP-PROGRAMME] • Cybersecurity Internship • Cohort 1 Stage: 0 • Induction at the gate
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 1: METHODOLOGY AND CONFIDENCE DEFINITIONS
+
+Methodology
+
+My evidence table documents suspicious SSH logins activity from the [FINTECH-CLIENT] [GATEWAY-SERVER] authentication log from anonymized-auth-log.txt. Each suspicious event I outlined in my table was evaluated against the staff roster data from anonymized-staff-roster.csv which helped me determine where login matched or did not match legitimate employee activity, with cross references from the ticket history, that is, the anonymized-ticket-history.csv where I identified patterns of dismissal to the tickets.
+
+Suspicious activity is identified through the following criteria: Login from unknown or unexpected geographic IP address, login during non-business hours or when employee is on leave, privilege escalation (sudo commands), access to sensitive system files (logs, configuration, credentials), repeat activity from same external IP across multiple days and login activity that contradicts employee availability (leave dates, offboarding dates).
+
+Each row is assigned a confidence level based on the strength of corroborating evidence.
+
+CONFIDENCE LEVEL DEFINITIONS
+
+HIGH: I used this to define an activity that is clearly unauthorized and anomalous, confirmed with multiple independent corroborating sources. In this case, things like timeline, IP address and subsequent actions upon access pointed to unauthorized access. For example: on row 1 ([TICKET-A]), [OPERATIONS-ANALYST] on leave June 3-7 per anonymized-staff-roster.csv, yet login from foreign IP 185.220.101.9 at 2:07am per anonymized-auth-log.txt, followed by sudo access to auth.log per anonymized-auth-log.txt lines 13-15. Multiple independent sources (roster, auth log, ticket [TICKET-A]) all confirm unauthorized access.
+
+MEDIUM: This is for activities that are suspicious but contain one element that requires clarification. For example, the IP might be unusual but the timing of access is legitimate, or the time is unusual but the IP could be employee working from home. This type requires follow-up investigation to rule out legitimate explanations. For example: on row 7 (Daytime Login During Leave), [OPERATIONS-ANALYST]'s office laptop (IP 102.89.34.17) logs in during leave at normal business hours per anonymized-auth-log.txt lines 18, 29. Office IP, normal time, normal behavior. But [OPERATIONS-ANALYST] is on leave June 3-7 per anonymized-staff-roster.csv. Who is using the laptop? Could be manager [FINANCE-MANAGER] covering duties (legitimate) or attacker with physical access (not legitimate).
+
+LOW: Here, activity deviates from normal patterns but has a plausible or reasonable legitimate explanation. It requires investigation but is not definitive evidence of compromise on its own. For example: on row 5 (Brute Force Reconnaissance), external IP 45.95.147.12 attempts brute force against root account per anonymized-auth-log.txt lines 6-9, four failed attempts in 9 seconds per anonymized-ticket-history.csv [TICKET-1]. Clearly hostile intent. But the attack failed and was blocked by SSH rate-limiting & no unauthorized access occurred.
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 2: EVIDENCE TABLE
+
+| Row Label | Timestamp UTC | Source IP | Account | Why Suspicious | Corroborating Evidence (2+ files) | Confidence Level |
+|---|---|---|---|---|---|---|
+| **[TICKET-A]: Publickey acceptance** | Jun 4 02:07:52 | 185.220.101.9 | [OPERATIONS-ANALYST] | Employee on leave, external IP at odd hours, privilege escalation | anonymized-auth-log.txt (lines 12-16), anonymized-staff-roster.csv ([OPERATIONS-ANALYST]), anonymized-ticket-history.csv ([TICKET-A]) | HIGH |
+| **[TICKET-B]: Next Day Repeat** | Jun 5 03:14:22 | 185.220.101.9 | [OPERATIONS-ANALYST] | External IP in again 24H later, same account, same pattern and establishment of sustained attacker access | anonymized-auth-log.txt (lines 22-24), anonymized-staff-roster.csv ([OPERATIONS-ANALYST]), anonymized-ticket-history.csv ([TICKET-B]) | HIGH |
+| **Threat Actor Named** | Jun 4 02:07 | 185.220.101.9 | [OPERATIONS-ANALYST] | Identified by name in anonymized-encoded-strings.txt: "The Griot is already inside the walls" | anonymized-encoded-strings.txt (String 4: decoded from base64), anonymized-ticket-history.csv ([TICKET-A], [TICKET-B], [TICKET-C], [TICKET-D]... all tied to same IP 185.220.101.9) | HIGH |
+| **[FORMER-EMPLOYEE-ACCOUNT]: Post-offboarding Access** | Jun 3 13:28:09 / Jun 4 17:11:05 / Jun 5 18:02:51 | 102.89.34.22 | [FORMER-EMPLOYEE-ACCOUNT] | Offboarded employee but account shows active authentication indicating that either the account was not revoked or the credentials were exposed/compromised | anonymized-staff-roster.csv ([FORMER-EMPLOYEE-ACCOUNT]), anonymized-auth-log.txt (lines 9, 20, 30), anonymized-ticket-history.csv ([TICKET-G]) | HIGH |
+| **Brute-force Reconnaissance** | Jun 3 11:41:55 / 11:41:58 / 11:42:01 / 11:42:04 | 45.95.147.12 | root | 4 failed password attempts against root account by external IP in 9 seconds. Active reconnaissance before a successful breach | anonymized-auth-log.txt (lines 6-9), anonymized-ticket-history.csv ([TICKET-1]) | MEDIUM |
+| **[TICKET-C] / [TICKET-D]: Data Theft** | Jun 4 02:31:55 / 03:01:30 | 185.220.101.9 | [OPERATIONS-ANALYST] | Large tarball from customers.csv & transactions.csv immediately exfiltrated to attacker's IP via scp. A confirmed data breach! | anonymized-auth-log.txt (session active during timeframe), anonymized-ticket-history.csv ([TICKET-C] and [TICKET-D], both dismissed without investigation) | HIGH |
+| **Daytime Login During Leave** | Jun 4 07:58:11 / Jun 5 09:01:03 | 102.89.34.17 | [OPERATIONS-ANALYST] | During leave period, [OPERATIONS-ANALYST]'s office laptop logs in from [OFFICE-LOCATION] at daytime hours. Either it's [FINANCE-MANAGER] covering the duties or an attacker with physical/remote access to the laptop | anonymized-auth-log.txt (lines 18, 29), anonymized-staff-roster.csv ([OPERATIONS-ANALYST]) | MEDIUM |
+| **Repeat Reconnaissance** | Jun 5 03:16:08 | 185.220.101.9 | [OPERATIONS-ANALYST] | Repeat reconnaissance where the attacker reads sensitive files again using sudo. Possibly verifying persistent access | anonymized-auth-log.txt (line 23), anonymized-ticket-history.csv ([TICKET-F]) | HIGH |
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 3-4: ROW-BY-ROW ANALYSIS
+
+ROW 1 - [TICKET-A]: Publickey acceptance
+
+On June 4 at 02:07:52 UTC, account [OPERATIONS-ANALYST] successfully authenticated from IP 185.220.101.9. This is a clear break-in. First, [OPERATIONS-ANALYST] was on annual leave from June 3-7 per anonymized-staff-roster.csv. Second, the IP 185.220.101.9 is not on [FINTECH-CLIENT]'s list of known corporate IPs. [OPERATIONS-ANALYST]'s normal laptop is 102.89.34.17 from [OFFICE-LOCATION]. This login came from overseas. Third, within 2 minutes of authenticating, the attacker ran sudo commands to read /var/log/auth.log, /etc/sudoers.d/90-ops, and /var/log/syslog. This is reconnaissance. A normal employee on leave does not log in at 2:07am from an unknown IP and immediately read system security files. The SIEM flagged this as medium severity (ticket [TICKET-A]) at 07:55 UTC but the alert was opened 5.5 hours after the actual login. The analyst dismissed it with "probably nothing" and "user on leave; possibly VPN" without verifying the VPN claim or investigating the sudo commands. The evidence is overwhelming: wrong time, wrong IP, wrong location, wrong behavior.
+
+ROW 2 - [TICKET-B]: Next Day Repeat
+
+On June 5 at 03:14:22 UTC, the same IP (185.220.101.9) logged into [OPERATIONS-ANALYST]'s account again. This time at 03:16:08 UTC, the attacker read /var/log/auth.log using sudo. This repeat login proves the attacker has reliable, persistent access to [OPERATIONS-ANALYST]'s credentials. They did not break in by accident on June 4 and leave. They came back deliberately 24 hours later, from the same IP, using the same account, running the same reconnaissance commands. [OPERATIONS-ANALYST] is still on leave (through June 7 per roster). Yet [OPERATIONS-ANALYST]'s account authenticates at 3:14am from overseas. The SIEM created ticket [TICKET-B] at 03:14:30 UTC within 30 seconds of the login but it was immediately closed at 08:02 UTC with disposition "resolved-by-reference" to the original [TICKET-A] dismissal. In other words: because the first ticket was marked "probably nothing," this one must be fine too. But each attack should be treated as new evidence, not bundled into an earlier dismissal. Same pattern, same IP, same account, one day apart.
+
+ROW 3 - Threat Actor Named
+
+The anonymized-encoded-strings.txt file contains four payloads. String #4, when decoded from base64, reads: "The Griot is already inside the walls." This identifies the threat actor by name. The Griot is a known adversary documented in regional threat-intel feeds. The fact that The Griot's name appears in a message forwarded to [FINTECH-CLIENT]'s SOC indicates this is not a random attacker. This is a targeted, sophisticated campaign. The same IP (185.220.101.9) appears across all the critical tickets ([TICKET-A], [TICKET-B], [TICKET-C], [TICKET-D]) all tied to the same attacker. We can now attribute the attack to a known adversary.
+
+ROW 4 - [FORMER-EMPLOYEE-ACCOUNT]: Post-offboarding Access
+
+[FORMER-EMPLOYEE-ACCOUNT] left [FINTECH-CLIENT] on April 12, 2024 per anonymized-staff-roster.csv. Status is marked "offboarded." Yet on June 3 at 13:28:09 UTC, June 4 at 17:11:05 UTC, and June 5 at 18:02:51 UTC, [FORMER-EMPLOYEE-ACCOUNT]'s account successfully authenticated from IP 102.89.34.22. An offboarded account should have zero access. The fact that [FORMER-EMPLOYEE-ACCOUNT] can still log in means either: (1) [FINTECH-CLIENT] failed to revoke [FORMER-EMPLOYEE-ACCOUNT]'s access when she left, or (2) the attacker obtained [FORMER-EMPLOYEE-ACCOUNT]'s credentials and is using them as a backup entry point. Either scenario is a security failure. The SIEM did not flag [FORMER-EMPLOYEE-ACCOUNT]'s logins during June 3-5. It was only on June 6 that ticket [TICKET-G] was created, noting "[FORMER-EMPLOYEE-ACCOUNT] account showing in audit log — she's been gone two months." By that point, the attacker had three days of undetected access using a dead account, meanwhile an offboarded account should not legitimately authenticate.
+
+ROW 5 - Brute Force Reconnaissance
+
+On June 3 at 11:41:55 UTC, an external IP (45.95.147.12) attempted to log into [FINTECH-CLIENT]'s root account using a password. The attempt failed. It tried again at 11:41:58 UTC, 11:42:01 UTC, and 11:42:04 UTC. Four failures in 9 seconds. The SSH daemon disconnected with "Too many authentication failures." The same IP tried brute force against the admin account on June 4 at 15:14:38 UTC and 15:14:41 UTC. This is reconnaissance. The attacker is probing [FINTECH-CLIENT]'s front door to see if they can break in by guessing passwords. They failed because SSH rate-limiting blocked them. But this activity shows that someone was actively scanning [FINTECH-CLIENT] before the successful break-in on June 4 at 02:07 UTC. The tickets ([TICKET-1], [TICKET-2]) were dismissed as "blocked at edge, no further action." Technically correct because the attack failed but nobody connected this probing activity to the later successful break-in.
+
+ROW 6 - [TICKET-C] / [TICKET-D]: Data Theft
+
+On June 4 at 02:31:55 UTC, a large compressed file (tarball) was created in /tmp containing customers.csv and transactions.csv. These are [FINTECH-CLIENT]'s most sensitive databases: customer names, addresses, and transaction records. Creating a tarball is a standard data-theft technique where one compresses sensitive files, hide them in a temporary folder and then exfiltrate. The SIEM flagged this as HIGH severity (ticket [TICKET-C]). But the analyst dismissed it with "[OPERATIONS-ANALYST] explained as personal backup test." [OPERATIONS-ANALYST] was on leave so she did not explain anything and I doubt that the attacker who logged in as [OPERATIONS-ANALYST], did account to anybody. Then, at 03:01:30 UTC, the attacker ran scp (secure copy) to transfer the tarball to 185.220.101.9:/dropbox/. This is confirmed data exfiltration. The attacker is stealing [FINTECH-CLIENT]'s customer financial data. Ticket [TICKET-D] was marked CRITICAL severity but closed immediately with "resolved-by-reference" bundled into [TICKET-C]'s dismissal. No investigation when customer data left [FINTECH-CLIENT]'s network at 03:01 UTC on June 4 and is now in the attacker's possession. Evidence is quite explicit: sensitive data was copied, packaged, and sent to a hostile IP.
+
+ROW 7 - Daytime Login During Leave
+
+On June 4 at 07:58:11 UTC and June 5 at 09:01:03 UTC, [OPERATIONS-ANALYST]'s office laptop (IP 102.89.34.17) logged in from [OFFICE-LOCATION] at daytime hours. These are legitimate-looking logins: office IP, office hours and normal working time but [OPERATIONS-ANALYST] was/is on leave (June 3-7), so who is using [OPERATIONS-ANALYST]'s laptop? Two possibilities: (1) [FINANCE-MANAGER] is covering [OPERATIONS-ANALYST]'s work while [OPERATIONS-ANALYST] is away… legitimate. (2) The attacker has physical or remote access to [OPERATIONS-ANALYST]'s laptop and is using it… not legitimate. The ticket history does not show an investigation into who was actually at [OPERATIONS-ANALYST]'s desk which requires a follow-up. The login pattern is normal, but the timeline is anomalous.
+
+ROW 8 - Repeat Reconnaissance
+
+On June 5 at 03:16:08 UTC, during the second malicious login from 185.220.101.9, the attacker again read /var/log/auth.log using sudo. This is the same reconnaissance command as June 4 at 02:09 UTC. Why would the attacker check the logs a second time? Possible reasons: (1) "Have I been caught?": checking if their June 4 activity generated alerts. (2) "What happened while I was offline?": seeing if daytime activity revealed anything. (3) "Can I still trust my access?": verifying that the sudo permission is still active. Ticket [TICKET-F] was created at 03:16:10 UTC and marked MEDIUM severity but immediately closed with "resolved-no-action" because sudo access was "approved per [TICKET-7]." That earlier ticket (May 22) gave [OPERATIONS-ANALYST] temporary sudo access for "triage" work, valid for 14 days. But it is now June 5, making it more than 14 days later. Either the permission was never revoked, or the attacker is exploiting an expired permission that nobody monitored.
+
+═══════════════════════════════════════════════════════════════════════
+
+PAGE 5: PATTERN SUMMARY AND NEXT INVESTIGATIVE STEPS
+
+Pattern Summary
+
+The attack follows a clear progression over four days:
+
+On June 3, an external IP (45.95.147.12) conducted brute force reconnaissance against [FINTECH-CLIENT]'s root and admin accounts. The attacks failed and were blocked by SSH rate-limiting, but they indicated active probing of the network.
+
+On June 4 at 02:07am, a different external IP (185.220.101.9) successfully broke into [OPERATIONS-ANALYST]'s account. Within 2 minutes, the attacker escalated privileges and read system security files. Within 24 minutes, the attacker created a compressed file containing [FINTECH-CLIENT]'s customer and transaction databases. Within 54 minutes (by 03:01am), the attacker exfiltrated this data to their own server at 185.220.101.9:/dropbox/. The attacker also attempted to establish persistence via a cron RELOAD event at 02:14am.
+
+On June 4 during daytime hours, [OPERATIONS-ANALYST]'s office laptop (a different IP) also logged in from [OFFICE-LOCATION]. This could be [FINANCE-MANAGER] covering [OPERATIONS-ANALYST]'s duties, or an attacker with physical access to [OPERATIONS-ANALYST]'s desk.
+
+On June 5 at 03:14am, the same attacker (185.220.101.9) returned to [OPERATIONS-ANALYST]'s account and again read authentication logs. This demonstrates sustained, reliable access and the attacker's intent to remain in the system.
+
+Throughout June 3-5, a separate account ([FORMER-EMPLOYEE-ACCOUNT]) that should have been deactivated (employee left April 12) also appears authenticated. This indicates either failed account deactivation or a second compromised account.
+
+MOST CONCERNING ROW
+
+The smoking gun is Row 6 ([TICKET-C] / [TICKET-D] Data Theft) because [FINTECH-CLIENT]'s customer financial data (customers.csv and transactions.csv) left the network at 03:01 UTC on June 4 and is now in the attacker's possession which is now a breach of customer trust and potential regulatory liability.
+
+NEXT INVESTIGATIVE STEPS
+
+1. Immediately notify [FINTECH-CLIENT]'s legal and compliance teams that customer data was exfiltrated. Contact affected customers to inform them of the breach. File required regulatory notifications (Data Protection Officer, financial authorities) per NDPR requirements.
+
+2. Force an immediate password reset for [OPERATIONS-ANALYST] and any other user who may have had their credentials compromised. Revoke all active SSH sessions for [OPERATIONS-ANALYST]'s account. Block IP 185.220.101.9 at the network edge. Scan for any backdoors or persistence mechanisms (cron jobs, SSH keys, scheduled tasks) left by the attacker.
+
+3. Investigate [FORMER-EMPLOYEE-ACCOUNT]'s account. Determine whether it was never deactivated (process failure) or whether the attacker obtained her credentials (compromise). If [FORMER-EMPLOYEE-ACCOUNT]'s credentials are compromised, treat them the same as [OPERATIONS-ANALYST]'s.
+
+4. Verify who was physically using [OPERATIONS-ANALYST]'s office laptop during June 4-5. Contact [FINANCE-MANAGER] to confirm whether [FINANCE-MANAGER] was covering [OPERATIONS-ANALYST]'s duties, or investigate whether an unauthorized person accessed the desk.
+
+5. Review the ticket history to understand why critical-severity alerts ([TICKET-C], [TICKET-D]) were dismissed without investigation. Implement a procedural change: alerts marked CRITICAL or HIGH severity require escalation to a second analyst or manager within 1 hour. No single analyst should close a CRITICAL ticket without peer review.
+
+═══════════════════════════════════════════════════════════════════════
+END OF D1 (ANONYMIZED)
+═══════════════════════════════════════════════════════════════════════
